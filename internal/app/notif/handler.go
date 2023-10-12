@@ -1,4 +1,4 @@
-package user
+package notif
 
 import (
 	"net/http"
@@ -11,44 +11,41 @@ import (
 )
 
 type handler struct {
-	service service.User
+	service service.Notif
 }
 
 func NewHandler(DB *bun.DB) *handler {
-	service.NewUser(DB)
 	return &handler{
-		service: service.UserService,
+		service: service.NewNotif(DB),
 	}
 }
 
-// @Summary      CreateUser
-// @Description  CreateUser
-// @Tags         User
+// @Summary      CreateNotif
+// @Description  CreateNotif
+// @Tags         Notif
 // @Accept       json
 // @Produce      json
-// @Param request body dto.User true "request body"
-// @Success      200  {object}  dto.SignupRequest
+// @Param request body dto.NotifRequest true "request body"
+// @Success      200  {object}  string "success"
 // @Failure      400  {object}  string "Bad Request"
 // @Failure      404  {object}  string "Not Found"
 // @Failure      500  {object}  string "Internal Server Error"
-// @Router       /api/v1/user [post]
+// @Router       /api/v1/notif [post]
 func (h *handler) Create(c *gin.Context) {
-	payload := new(dto.SignupRequest)
+	payload := new(dto.NotifRequest)
 	err := c.ShouldBindJSON(payload)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	data, err := h.service.Create(c, payload)
+	err = h.service.Create(c, payload)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, &dto.User{
-		ID:    data.ID,
-		Name:  data.Username,
-		Email: data.Email,
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
 	})
 }

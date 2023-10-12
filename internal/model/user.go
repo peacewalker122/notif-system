@@ -18,6 +18,8 @@ type User struct {
 	CreatedAt     time.Time  `bun:"created_at"`
 	UpdatedAt     *time.Time `bun:"updated_at"`
 	DeletedAt     *time.Time `bun:"deleted_at,soft_delete"`
+
+	DeviceToken *string `bun:"device_token,scanonly"`
 }
 
 // BeforeAppendModel implements schema.BeforeAppendModelHook.

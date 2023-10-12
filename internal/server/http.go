@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"notifsys/internal/app/notif"
 	"notifsys/internal/app/user"
 	"notifsys/pkg/db"
 
@@ -29,5 +30,6 @@ func Run(r *gin.Engine, d *db.DB) {
 	v1 := r.Group("/api/v1")
 	{
 		user.NewHandler(d.DB).Route(v1.Group("/user"))
+		notif.NewHandler(d.DB).Route(v1.Group("/notif"))
 	}
 }

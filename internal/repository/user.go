@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	_    UserRepository = (*userRepository)(nil)
+	_ UserRepository = (*userRepository)(nil)
 
 	User UserRepository
 )
@@ -43,7 +43,14 @@ func (u *userRepository) Create(ctx context.Context, payload *model.User) (*mode
 func (u *userRepository) Find(ctx context.Context, f *dto.UserFilter, p *abstraction.Pagination) ([]*model.User, error) {
 	result := make([]*model.User, 0)
 
-	err := u.NewSelect().Model((*model.User)(nil)).ApplyQueryBuilder(f.Apply).Scan(ctx, result)
+	err := u.NewSelect().Model((*model.User)(nil)).
+	Apply(func(sq *bun.SelectQuery) *bun.SelectQuery {
+		if f != nil {
+			f.Apply(sq)
+		}
+
+		return sq
+	}).Scan(ctx, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +61,15 @@ func (u *userRepository) Find(ctx context.Context, f *dto.UserFilter, p *abstrac
 func (u *userRepository) FindOne(ctx context.Context, f *dto.UserFilter) (*model.User, error) {
 	result := &model.User{}
 
-	err := u.NewSelect().Model(result).ApplyQueryBuilder(f.Apply).Scan(ctx, result)
+	err := u.NewSelect().
+	Model((*model.User)(nil)).
+	Apply(func(sq *bun.SelectQuery) *bun.SelectQuery {
+		if f != nil {
+			f.Apply(sq)
+		}
+
+		return sq
+	}).Scan(ctx, result)
 	if err != nil {
 		return nil, err
 	}

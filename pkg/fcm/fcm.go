@@ -10,7 +10,7 @@ import (
 var APP *firebase.App
 
 func New() (err error) {
-	opt := option.WithCredentialsFile("../private/fcm.json")
+	opt := option.WithCredentialsFile("./private/fcm.json")
 	APP, err = firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return

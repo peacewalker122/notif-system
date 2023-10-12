@@ -1,4 +1,4 @@
-package user
+package service
 
 import (
 	"context"
@@ -12,23 +12,25 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type Service interface {
+var UserService User
+
+type User interface {
 	Create(ctx context.Context, payload *dto.SignupRequest) (*model.User, error)
 	FindOne(ctx context.Context, f *dto.UserFilter) (*model.User, error)
 }
 
-func NewService(DB *bun.DB) *service {
-	return &service{
+func NewUser(DB *bun.DB) {
+	UserService = &user{
 		DB: DB,
 	}
 }
 
-type service struct {
+type user struct {
 	DB *bun.DB
 }
 
 // Create implements Service.
-func (s *service) Create(ctx context.Context, payload *dto.SignupRequest) (*model.User, error) {
+func (s *user) Create(ctx context.Context, payload *dto.SignupRequest) (*model.User, error) {
 	var data *model.User
 
 	pass, err := bcrypt.HashPassword(payload.Password)
@@ -67,8 +69,6 @@ func (s *service) Create(ctx context.Context, payload *dto.SignupRequest) (*mode
 }
 
 // FindOne implements Service.
-func (s *service) FindOne(ctx context.Context, f *dto.UserFilter) (*model.User, error) {
+func (s *user) FindOne(ctx context.Context, f *dto.UserFilter) (*model.User, error) {
 	return repository.User.FindOne(ctx, f)
 }
-
-var _ Service = (*service)(nil)

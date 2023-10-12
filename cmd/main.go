@@ -42,12 +42,12 @@ func main() {
 	r := gin.New()
 	database := db.New()
 
-	factory.Run(database.DB)
-
 	err := fcm.New()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	factory.Run(database.DB)
 
 	server.Run(r, database)
 	host := fmt.Sprintf(":%s", cfg.Host)

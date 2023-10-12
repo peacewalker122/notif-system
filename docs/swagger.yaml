@@ -1,5 +1,19 @@
 basePath: /api/v1
 definitions:
+  dto.NotifRequest:
+    properties:
+      message:
+        additionalProperties:
+          type: string
+        type: object
+      user_id:
+        items:
+          type: integer
+        type: array
+    required:
+    - message
+    - user_id
+    type: object
   dto.SignupRequest:
     properties:
       device_token:
@@ -48,7 +62,41 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /user:
+  /api/v1/notif:
+    post:
+      consumes:
+      - application/json
+      description: CreateNotif
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NotifRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: CreateNotif
+      tags:
+      - Notif
+  /api/v1/user:
     post:
       consumes:
       - application/json

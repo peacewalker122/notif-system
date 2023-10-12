@@ -7,17 +7,21 @@ import (
 type UserFilter struct {
 	ID    []int   `json:"id"`
 	Email *string `json:"email"`
+
+	WithDeviceToken bool `json:"-"`
 }
 
-func (u *UserFilter) Apply(db bun.QueryBuilder) bun.QueryBuilder {
+func (u *UserFilter) Apply(db *bun.SelectQuery) {
 	if len(u.ID) > 0 {
-		db = db.Where("id IN (?)", bun.In(u.ID))
+		db = db.Where("u.id IN (?)", bun.In(u.ID))
 	}
 	if u.Email != nil {
-		db = db.Where("email = ?", *u.Email)
+		db = db.Where("u.email = ?", *u.Email)
 	}
-
-	return db
+	if u.WithDeviceToken {
+		db = db.Join("JOIN devices ON devices.user_id = u.id")
+		db.ColumnExpr("u.*,devices.device_token as device_token")
+	}
 }
 
 type User struct {
