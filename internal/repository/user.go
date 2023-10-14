@@ -6,26 +6,17 @@ import (
 	"notifsys/abstraction"
 	"notifsys/internal/dto"
 	"notifsys/internal/model"
+	"notifsys/internal/repository/interfaces"
 
 	"github.com/uptrace/bun"
 )
 
-var (
-	_ UserRepository = (*userRepository)(nil)
-
-	User UserRepository
-)
-
-type UserRepository interface {
-	Create(ctx context.Context, payload *model.User) (*model.User, error)
-	Find(ctx context.Context, f *dto.UserFilter, p *abstraction.Pagination) ([]*model.User, error)
-	FindOne(ctx context.Context, f *dto.UserFilter) (*model.User, error)
-}
-
-func NewUser(db *bun.DB) {
-	User = &userRepository{
+func NewUser(db *bun.DB) interfaces.User {
+	User := &userRepository{
 		DB: db,
 	}
+
+	return User
 }
 
 type userRepository struct {
@@ -44,13 +35,13 @@ func (u *userRepository) Find(ctx context.Context, f *dto.UserFilter, p *abstrac
 	result := make([]*model.User, 0)
 
 	err := u.NewSelect().Model((*model.User)(nil)).
-	Apply(func(sq *bun.SelectQuery) *bun.SelectQuery {
-		if f != nil {
-			f.Apply(sq)
-		}
+		Apply(func(sq *bun.SelectQuery) *bun.SelectQuery {
+			if f != nil {
+				f.Apply(sq)
+			}
 
-		return sq
-	}).Scan(ctx, &result)
+			return sq
+		}).Scan(ctx, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -62,14 +53,14 @@ func (u *userRepository) FindOne(ctx context.Context, f *dto.UserFilter) (*model
 	result := &model.User{}
 
 	err := u.NewSelect().
-	Model((*model.User)(nil)).
-	Apply(func(sq *bun.SelectQuery) *bun.SelectQuery {
-		if f != nil {
-			f.Apply(sq)
-		}
+		Model((*model.User)(nil)).
+		Apply(func(sq *bun.SelectQuery) *bun.SelectQuery {
+			if f != nil {
+				f.Apply(sq)
+			}
 
-		return sq
-	}).Scan(ctx, result)
+			return sq
+		}).Scan(ctx, result)
 	if err != nil {
 		return nil, err
 	}

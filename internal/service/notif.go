@@ -2,31 +2,31 @@ package service
 
 import (
 	"context"
+	"log"
 
 	"notifsys/internal/dto"
-	"notifsys/internal/repository"
+	"notifsys/internal/factory"
+	"notifsys/internal/repository/interfaces"
 
 	"firebase.google.com/go/messaging"
 	"github.com/uptrace/bun"
 )
 
-type Notif interface {
-	Create(ctx context.Context, payload *dto.NotifRequest) error
-}
-
-func NewNotif(DB *bun.DB) Notif {
-	return &notif{
-		DB: DB,
+func NewNotif(f *factory.Factory) *Notif {
+	return &Notif{
+		DB:   f.DB,
+		User: f.User,
 	}
 }
 
-type notif struct {
-	DB *bun.DB
+type Notif struct {
+	DB   *bun.DB
+	User interfaces.User
 }
 
 // Create implements Service.
-func (s *notif) Create(ctx context.Context, payload *dto.NotifRequest) error {
-	data, err := repository.User.Find(ctx, &dto.UserFilter{
+func (s *Notif) Create(ctx context.Context, payload *dto.NotifRequest) error {
+	data, err := s.User.Find(ctx, &dto.UserFilter{
 		ID:              payload.UserID,
 		WithDeviceToken: true,
 	}, nil)
@@ -41,6 +41,8 @@ func (s *notif) Create(ctx context.Context, payload *dto.NotifRequest) error {
 			devicestoken = append(devicestoken, *v.DeviceToken)
 		}
 	}
+
+	log.Printf("data: %+v\n", devicestoken)
 
 	err = FCMService.SendMessage(ctx, &messaging.MulticastMessage{
 		Notification: &messaging.Notification{

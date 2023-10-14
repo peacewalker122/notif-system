@@ -37,6 +37,7 @@ import (
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
+	donechan := make(chan struct{})
 	godotenv.Load(".env.local")
 	cfg := config.Get().APP
 	r := gin.New()
@@ -47,9 +48,9 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	factory.Run(database.DB)
+	f := factory.New(database.DB, donechan)
 
-	server.Run(r, database)
+	server.Run(r, f)
 	host := fmt.Sprintf(":%s", cfg.Host)
 
 	go func() {
@@ -64,4 +65,5 @@ func main() {
 	signal.Notify(done, os.Interrupt, os.Kill)
 
 	<-done
+	close(donechan)
 }

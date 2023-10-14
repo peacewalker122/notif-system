@@ -4,20 +4,21 @@ import (
 	"net/http"
 
 	"notifsys/internal/dto"
+	"notifsys/internal/factory"
 	"notifsys/internal/service"
+	"notifsys/internal/service/interfaces"
 
 	"github.com/gin-gonic/gin"
-	"github.com/uptrace/bun"
 )
 
 type handler struct {
-	service service.User
+	service interfaces.User
 }
 
-func NewHandler(DB *bun.DB) *handler {
-	service.NewUser(DB)
+func NewHandler(f *factory.Factory) *handler {
+	service.NewUser(f)
 	return &handler{
-		service: service.UserService,
+		service: service.NewUser(f),
 	}
 }
 

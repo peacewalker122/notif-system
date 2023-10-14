@@ -5,7 +5,7 @@ import (
 
 	"notifsys/internal/app/notif"
 	"notifsys/internal/app/user"
-	"notifsys/pkg/db"
+	"notifsys/internal/factory"
 
 	"github.com/gin-gonic/gin"
 
@@ -15,7 +15,7 @@ import (
 	"notifsys/docs"
 )
 
-func Run(r *gin.Engine, d *db.DB) {
+func Run(r *gin.Engine, f *factory.Factory) {
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Host = "localhost:300"
 
@@ -29,7 +29,7 @@ func Run(r *gin.Engine, d *db.DB) {
 
 	v1 := r.Group("/api/v1")
 	{
-		user.NewHandler(d.DB).Route(v1.Group("/user"))
-		notif.NewHandler(d.DB).Route(v1.Group("/notif"))
+		user.NewHandler(f).Route(v1.Group("/user"))
+		notif.NewHandler(f).Route(v1.Group("/notif"))
 	}
 }

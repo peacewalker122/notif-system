@@ -6,21 +6,17 @@ import (
 	"notifsys/abstraction"
 	"notifsys/internal/dto"
 	"notifsys/internal/model"
+	"notifsys/internal/repository/interfaces"
 
 	"github.com/uptrace/bun"
 )
 
-var Device DeviceRepository
-
-type DeviceRepository interface {
-	Create(ctx context.Context, payload *model.Device) (*model.Device, error)
-	FindOne(ctx context.Context, f *dto.DeviceFilter) (*model.Device, error)
-}
-
-func NewDevice(db *bun.DB) {
-	Device = &deviceRepository{
+func NewDevice(db *bun.DB) interfaces.Device {
+	Device := &deviceRepository{
 		DB: db,
 	}
+
+	return Device
 }
 
 type deviceRepository struct {

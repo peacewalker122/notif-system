@@ -4,33 +4,30 @@ import (
 	"context"
 
 	"notifsys/internal/dto"
+	"notifsys/internal/factory"
 	"notifsys/internal/model"
-	"notifsys/internal/repository"
+	"notifsys/internal/repository/interfaces"
 	"notifsys/pkg/bcrypt"
 	"notifsys/pkg/trx"
 
 	"github.com/uptrace/bun"
 )
 
-var UserService User
-
-type User interface {
-	Create(ctx context.Context, payload *dto.SignupRequest) (*model.User, error)
-	FindOne(ctx context.Context, f *dto.UserFilter) (*model.User, error)
-}
-
-func NewUser(DB *bun.DB) {
-	UserService = &user{
-		DB: DB,
+func NewUser(f *factory.Factory) *User {
+	return &User{
+		DB:   f.DB,
+		User: f.User,
 	}
 }
 
-type user struct {
-	DB *bun.DB
+type User struct {
+	DB     *bun.DB
+	User   interfaces.User
+	Device interfaces.Device
 }
 
 // Create implements Service.
-func (s *user) Create(ctx context.Context, payload *dto.SignupRequest) (*model.User, error) {
+func (s *User) Create(ctx context.Context, payload *dto.SignupRequest) (*model.User, error) {
 	var data *model.User
 
 	pass, err := bcrypt.HashPassword(payload.Password)
@@ -42,7 +39,7 @@ func (s *user) Create(ctx context.Context, payload *dto.SignupRequest) (*model.U
 	err = trx.New(s.DB).Run(ctx, func(ctx context.Context) error {
 		var err error
 
-		data, err = repository.User.Create(ctx, &model.User{
+		data, err = s.User.Create(ctx, &model.User{
 			Username: payload.Name,
 			Email:    payload.Email,
 			Password: payload.Password,
@@ -51,7 +48,7 @@ func (s *user) Create(ctx context.Context, payload *dto.SignupRequest) (*model.U
 			return err
 		}
 
-		_, err = repository.Device.Create(ctx, &model.Device{
+		_, err = s.Device.Create(ctx, &model.Device{
 			UserID:      &data.ID,
 			DeviceToken: payload.DeviceToken,
 		})
@@ -69,6 +66,6 @@ func (s *user) Create(ctx context.Context, payload *dto.SignupRequest) (*model.U
 }
 
 // FindOne implements Service.
-func (s *user) FindOne(ctx context.Context, f *dto.UserFilter) (*model.User, error) {
-	return repository.User.FindOne(ctx, f)
+func (s *User) FindOne(ctx context.Context, f *dto.UserFilter) (*model.User, error) {
+	return s.User.FindOne(ctx, f)
 }

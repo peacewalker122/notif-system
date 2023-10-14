@@ -7,6 +7,7 @@ import (
 type Config struct {
 	DBConfig *DB
 	APP      *APP
+	AMQP     *AMQP
 }
 
 type DB struct {
@@ -22,6 +23,10 @@ type DB struct {
 
 type APP struct {
 	Host string
+}
+
+type AMQP struct {
+	URL string
 }
 
 func (d *DB) URL() string {
