@@ -26,6 +26,7 @@ func Get() *Config {
 			},
 			APP: &APP{
 				Host: os.Getenv("APPHOST"),
+				Name: os.Getenv("APPNAME"),
 			},
 			AMQP: &AMQP{
 				URL: os.Getenv("AMQPURL"),

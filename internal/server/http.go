@@ -1,8 +1,6 @@
 package server
 
 import (
-	"net/http"
-
 	"notifsys/internal/app/notif"
 	"notifsys/internal/app/user"
 	"notifsys/internal/factory"
@@ -22,10 +20,6 @@ func Run(r *gin.Engine, f *factory.Factory) {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler), gin.BasicAuth(gin.Accounts{
 		"admin": "password",
 	}))
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
 
 	v1 := r.Group("/api/v1")
 	{

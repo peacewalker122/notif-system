@@ -41,7 +41,7 @@ func (h *handler) Create(c *gin.Context) {
 		return
 	}
 
-	data, err := h.service.Create(c, payload)
+	data, err := h.service.Create(c.Request.Context(), payload)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return

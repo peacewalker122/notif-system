@@ -22,6 +22,7 @@ type DB struct {
 }
 
 type APP struct {
+	Name string
 	Host string
 }
 

@@ -1,24 +1,19 @@
-package service
+package repository
 
 import (
 	"context"
+
+	"notifsys/internal/repository/interfaces"
+	"notifsys/pkg/tracer"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 )
 
-var FCMService FCM
-
-type FCM interface {
-	SendMessage(context.Context, *messaging.MulticastMessage) error
-}
-
-func New(fcm *firebase.App) FCM {
+func New(fcm *firebase.App) interfaces.FCM {
 	fcmstruct := &fcmService{
 		fcm: fcm,
 	}
-
-	FCMService = fcmstruct
 
 	return fcmstruct
 }
@@ -29,6 +24,9 @@ type fcmService struct {
 
 // SendMessage implements FCM.
 func (f *fcmService) SendMessage(ctx context.Context, message *messaging.MulticastMessage) error {
+	ctx, trc := tracer.Trace.Start(ctx, "SendMessage")
+	defer trc.End()
+
 	msg, err := f.fcm.Messaging(ctx)
 	if err != nil {
 		return err

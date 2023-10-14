@@ -8,8 +8,8 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/uptrace/bun"
-	"github.com/uptrace/bun/extra/bundebug"
 	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/extra/bunotel"
 )
 
 type DB struct {
@@ -30,9 +30,12 @@ func New() *DB {
 
 	db := bun.NewDB(sqldb, pgdialect.New())
 
-	db.AddQueryHook(bundebug.NewQueryHook(
-		bundebug.WithVerbose(true),
-		bundebug.FromEnv("2"),
+	// db.AddQueryHook(bundebug.NewQueryHook(
+	// 	bundebug.WithVerbose(true),
+	// 	bundebug.FromEnv("2"),
+	// ))
+	db.AddQueryHook(bunotel.NewQueryHook(
+		bunotel.WithDBName("app"),
 	))
 
 	return &DB{
