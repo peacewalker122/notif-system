@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"time"
 
+	"notifsys/internal/app/cron"
 	"notifsys/internal/config"
 	"notifsys/internal/factory"
 	"notifsys/internal/middleware"
@@ -52,7 +53,7 @@ func main() {
 	middleware.Run(r)
 	database := db.New()
 
-	err := fcm.New()
+	err := fcm.New("./private/fcm.json")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -75,6 +76,10 @@ func main() {
 		Handler: r,
 	}
 
+	// CRON Section
+	c := cron.NewCron(f)
+	c.Run(ctx)
+
 	go func() {
 		err := srv.ListenAndServe()
 		if err != nil {
@@ -92,10 +97,10 @@ func main() {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	database.Close()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
+	database.Close()
 	select {
 	case <-ctx.Done():
 		log.Println("timeout")

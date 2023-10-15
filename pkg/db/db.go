@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"log"
 	"time"
 
 	"notifsys/internal/config"
@@ -9,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/extra/bundebug"
 	"github.com/uptrace/bun/extra/bunotel"
 )
 
@@ -30,13 +32,17 @@ func New() *DB {
 
 	db := bun.NewDB(sqldb, pgdialect.New())
 
-	// db.AddQueryHook(bundebug.NewQueryHook(
-	// 	bundebug.WithVerbose(true),
-	// 	bundebug.FromEnv("2"),
-	// ))
+	db.AddQueryHook(bundebug.NewQueryHook(
+		bundebug.WithVerbose(true),
+		bundebug.FromEnv("2"),
+	))
 	db.AddQueryHook(bunotel.NewQueryHook(
 		bunotel.WithDBName("app"),
 	))
+
+	if err := db.Ping(); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	return &DB{
 		DB: db,

@@ -2,6 +2,7 @@ package fcm
 
 import (
 	"context"
+	"log/slog"
 
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/option"
@@ -9,12 +10,14 @@ import (
 
 var APP *firebase.App
 
-func New() (err error) {
-	opt := option.WithCredentialsFile("./private/fcm.json")
+func New(path string) (err error) {
+	opt := option.WithCredentialsFile(path)
 	APP, err = firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return
 	}
+
+	slog.Info("Firebase initialized", APP)
 
 	return
 }
